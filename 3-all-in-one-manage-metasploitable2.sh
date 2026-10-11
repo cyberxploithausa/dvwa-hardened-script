@@ -35,10 +35,17 @@ harden_machine() {
 
     # 2. Secure FTP (vsftpd)
     VSFTPD_CONF="/etc/vsftpd.conf"
-    [ ! -f "$VSFTPD_CONF" ] && VSFTPD_CONF="/etc/vsftpd.conf"
+    [ ! -f "$VSFTPD_CONF" ] && VSFTPD_CONF="/etc/vsftpd/vsftpd.conf"
     if [ -f "$VSFTPD_CONF" ]; then
         echo "[+] Disabling Anonymous FTP access..."
-        sed -i 's/anonymous_enable=YES/anonymous_enable=NO/g' "$VSFTPD_CONF"
+        sed -i 's/anonymous_enable=YES/anonymous_enable=NO/gI' "$VSFTPD_CONF"
+        sed -i 's/anonymous_enable=yes/anonymous_enable=NO/gI' "$VSFTPD_CONF"
+
+        # Double check if the line doesn't exist at ll. append it safely
+
+        if ! grep -qi "anonymous_enable" "$VSFTPD_CONF"; then
+            echo "anonymous_enable=NO" >> "$VSFTPD_CONF"
+        fi
         restart_service vsftpd
     fi
 
